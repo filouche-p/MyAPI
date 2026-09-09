@@ -8,7 +8,7 @@ import bcrypt from 'bcrypt';
 
 const app = express();
 const port = 8080;
-const users = []
+const users = {};
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -33,10 +33,10 @@ app.get("/all", async (req, res) => {
             allData.push(data);
         }
 
-        res.json(allData);
+        return res.json(allData);
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: "Erreur lors de la lecture des données" });
+        return res.status(500).json({ error: "Erreur lors de la lecture des données" });
     }
 });
 
@@ -53,30 +53,53 @@ app.get("/get", async (req, res) => {
 
     try {
         fs.access(filePath, constants.R_OK);
-        res.json(await getJsonData(fileName));
+        return res.json(await getJsonData(fileName));
     } catch (error) {
-        res.send(`Error while getting ${fileName}, must be one of ${await getAllJsonFiles(dir)}<br>.json extension is automaticly added`)
+        return res.send(`Error while getting ${fileName}, must be one of ${await getAllJsonFiles(dir)}<br>.json extension is automaticly added`)
     }
 });
 
 app.get("/register", (req, res) => {
-    res.sendFile(path.join(__dirname, 'public/src/html/register.html'));
+    return res.sendFile(path.join(__dirname, 'public/src/html/register.html'));
 });
 
 app.post("/register", async (req, res) => {
+    // Check for empty
     const {username, password} = req.body;
     const hashedPassword = await bcrypt.hash(password, 10);
+
+    users[username] = hashedPassword;
     
-    const user = { username: username, password: hashedPassword };
-    users.push(user);
-    
-    res.json(auth);
-    res.status(201).json({ message: 'Utilisateur créé' });
+    console.log(users);
+
+    return res.status(201).json({ message: 'Utilisateur créé' });
 });
 
-app.get("/login");
+app.get("/login", (req, res) => {
+    return res.sendFile(path.join(__dirname, 'public/src/html/login.html'))
+});
 
-app.post("/login");
+app.post("/login", async (req, res) => {
+    const {username, password} = req.body;
+    console.log(password);
+    console.log(users[0][username]);
+    const passwordCorrect = await bcrypt.compare(password, users[username]);
+    console.log(passwordCorrect);
+    // const user = { username: hashedPassword } || {};
+    console.log();
+
+    // if (!user) {
+    //     return res.status(401).json('Login empty please retry');
+    // }
+
+    if (!passwordCorrect) {
+        console.log("fail");
+        return res.status(401).json('Login fail, check username and password.');
+    }
+
+    // else the user is logged in
+    return res.status(201).json('Login success');
+});
 
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`);
