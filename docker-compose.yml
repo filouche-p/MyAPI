@@ -1,0 +1,15 @@
+services:
+    express-api:
+      container_name: express-api
+      build:
+        context: .
+        dockerfile: Dockerfile
+      restart: always
+      ports:
+        - "8080:8080"
+
+      env_file:
+        - .env
+
+      volumes:
+        - ./data:/app/data
