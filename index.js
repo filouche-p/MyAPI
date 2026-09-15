@@ -1,189 +1,182 @@
-import { getAllJsonFiles, getJsonData, initDB } from './db.js';
-import { isAdmin, getColumns } from './utils.js';
-import { fileURLToPath } from 'url';
-// import fs from "node:fs/promises";
-// import jwt from 'jsonwebtoken';
+import 'dotenv/config';
 import express from 'express';
-import path from "node:path";
+import { alasql, saveTable } from './db.js';
+import { authenticateToken, generateToken } from './utils.js';
 import bcrypt from 'bcrypt';
-// import { table } from 'node:console';
-
-const app = express();
-const port = 8080;
-const dbDir = "./db/"; // load from env
-app.use(express.json());
-
-const users = {'admin': await bcrypt.hash('admin', 10)};
-
-var db = await initDB(dbDir);
-const rawTables = db.exec('SHOW tables;');
-const allTablesList = rawTables.map(t => t.tableid);
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-app.use(express.static(path.join(__dirname, 'public')));
-app.use(express.urlencoded({ extended: true }));
+// --- Express config ---
+const app = express();
+const PORT = process.env.PORT || 8080;
 
-app.get('/', (req, res) => {
-    res.send('Hello World!');
-});
+app.use(express.json());
 
-// --- GET (Create read) ---
-app.get('/all', async (req, res) => {
-    // Whitelist and Blacklist ?
-    // table settings pour modifier ce genre de settings, sauvegarder en json laod la première fois depuis le env ?
-    const blacklist = ['attributes'];
-    let listeTables = Object.keys(db.tables).filter(tableName => !blacklist.includes(tableName));
+// --- Config ---
+const PAGE_LIMIT = process.env.PAGE_LIMIT || 20;
 
-    console.log(`Tables créées :${listeTables}`);
 
-    let data = {};
-
-    for (const tableName of listeTables) {
-        const tableData = db.exec(`SELECT * FROM ${tableName};`);
-        data[tableName] = tableData;
+// Middleware to verify if table exists
+const checkTableExists = (req, res, next) => {
+    const tableName = req.params.table_name;
+    if (!alasql.tables[tableName]) {
+        return res.status(404).json({ error: `Table '${tableName}' not found.` });
     }
+    next();
+};
 
-    return res.status(200).json(data);
-});
-
-app.get('/get', async (req, res) => {
-    const query = req.query; // filter possible query arg ?
-    console.log(query);
-
-    const possibleQuery = ['table'];
-    const queryKey = Object.keys(query);
-    const queryKeyPatch = queryKey.filter(param => possibleQuery.includes(param));
-
-    console.log(queryKey.length == queryKeyPatch.length ? `RAS` : `Paramètres suivant del : ${queryKey.filter(param => !possibleQuery.includes(param))}`);
-
-    // boucler sur query rajouter une condition si on est pas dans queryPatch on pass
-    // table obliger + vérif existances
-    console.log(allTablesList, query['table']);
-    if(!allTablesList.includes(query['table'])) {
-        return res.status(401).json('tablename unvalaible');
-    }
-
-    const data = db.exec(`SELECT * FROM ${query['table']}`);
-    return res.status(200).json(data);
-});
-
-// --- POST (CREATE add) ---
-app.post('/add', async (req, res) => {
-    const query = req.body;
-    console.log(query);
-
-    if(!isAdmin(req)) {
-        return res.status(401).json({'error' : 'Check your access'});
-    }
-
-    if(!query) {
-        return res.status(400).json({'error' : 'You need to specify a body attach to your request.'});
-    }
-
-    if(!Object.hasOwn(query, 'table')) {
-        return res.status(400).json({'error' : `Body need to include the table, must be one of : ${allTablesList}`});
-    }
-
-    if (!Object.hasOwn(query, 'columns') || !Array.isArray(query['columns'])) {
-        const columnsResult = getColumns(db, query['table']);
-
-        if (columnsResult.error) {
-            return res.status(400).json({ error: columnsResult.error });
-        }
-
-        return res.status(400).json({
-            error: `You need to specify the columns as an array you want to edit. For ${query['table']}, columns are: ${columnsResult.data}`
-        });
-    }
-
-    if (!Object.hasOwn(query, 'values') || !Array.isArray(query['values']) || query['columns'].length !== query['values'].length) {
-        console.log('You need t ospecify the values of the colums, you also need the same number of element in your columns and values acutal : ???');
-        return res.status(400).json({ error : "check values" });
-    }
-
-
-    const finalRequest = `INSERT INTO ${query['table']} () VALUES();`;
-
-    // Return value before and after ?
-    return res.status(201).json({ message: `Success ${finalRequest}` });
-});
-
-
-// --- UPDATE (Update put)---
-app.put('/update', async (req, res) => {
-    if(!isAdmin(req)) {
-        res.status(401).json('Check your access');
-    }
-
-    res.status(204).json('Success');
-});
-
-
-// --- DELETE (Destroy) --- 
-app.delete('/delete', async (req, res) => {
-    if(!isAdmin(req)) {
-        res.status(401).json('Check your access');
-    }
-
-    res.status(204).json('Success');
-});
-
-
-// --- Auth --- 
+// Authentication
 app.get('/register', (req, res) => {
     return res.sendFile(path.join(__dirname, 'public/src/html/register.html'));
 });
 
 app.post('/register', async (req, res) => {
-    // Check for empty ?
-    const {username, password} = req.body;
-    if (users[username]) {
-        return res.status(401).json('User with this user name already exists.');
+    const { username, password } = req.body;
+
+    if (!username || !password) {
+        return res.status(401).json({ error: 'Username or password invalid.' });
+    }
+
+    const existingUser = alasql('SELECT * FROM users WHERE key_name = ?', [username]);
+    if (existingUser.length > 0) {
+        return res.status(401).json({ error: 'User with this user name already exists.' });
     }
     
-    if (!username || !password) {
-        return res.status(401).json('Username or password invalid.');
-    }
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    users[username] = hashedPassword;
+    alasql('INSERT INTO users VALUES ?', [{ key_name: username, password: hashedPassword }]);
+    saveTable('users');
     
-    console.log(users);
-
     return res.status(201).redirect('/login');
 });
 
 app.get('/login', (req, res) => {
-    return res.sendFile(path.join(__dirname, 'public/src/html/login.html'))
+    return res.sendFile(path.join(__dirname, 'public/src/html/login.html'));
 });
 
 app.post('/login', async (req, res) => {
-    const {username, password} = req.body;
-    if (!users[username]) {
-        return res.status(401).json('Login fail, check username and password.');
+    const { username, password } = req.body;
+    
+    if (!username || !password) {
+        return res.status(401).json({ error: 'Login fail, check username and password.' });
     }
-    const passwordCorrect = await bcrypt.compare(password, users[username]);
+
+    const existingUser = alasql('SELECT * FROM users WHERE key_name = ?', [username]);
+    if (existingUser.length === 0) {
+        return res.status(401).json({ error: 'Login fail, check username and password.' });
+    }
+    
+    const passwordCorrect = await bcrypt.compare(password, existingUser[0].password);
 
     if (!passwordCorrect) {
-        return res.status(401).json('Login fail, check username and password.');
+        return res.status(401).json({ error: 'Login fail, check username and password.' });
     }
 
-    // else the user is logged in
-    // send token
-    return res.status(201).json('Login success');
+    const token = generateToken({ username });
+    return res.status(201).json({ message: 'Login success', token });
 });
 
-app.listen(port, async () => {
-    console.log(`Starting up express..`);
-    console.log(`Loading database :`);
+// GET all with pagination
+app.get('/api/:table_name', checkTableExists, (req, res) => {
+    const tableName = req.params.table_name;
+    const page = parseInt(req.query.page) || 1;
+    const offset = (page - 1) * PAGE_LIMIT;
 
-    const res = db.exec(`SELECT * FROM version;`);
-    console.log(res[0]);
+    const countResult = alasql(`SELECT COUNT(*) as total FROM ${tableName}`);
+    const totalItems = countResult[0].total;
 
-    console.log('Loaded table :');
-    console.log(allTablesList);
+    const resSQL = alasql(`SELECT * FROM ${tableName} LIMIT ${PAGE_LIMIT} OFFSET ${offset}`);
+
+    res.json({
+        page,
+        limit: PAGE_LIMIT,
+        totalItems,
+        totalPages: Math.ceil(totalItems / PAGE_LIMIT),
+        data: resSQL
+    });
+});
+
+// GET (Read)
+app.get('/api/:table_name/:key_name', checkTableExists, (req, res) => {
+    const keyName = req.params.key_name;
+    const tableName = req.params.table_name;
+    const data = alasql(`SELECT * FROM ${tableName} WHERE key_name = ?`, [keyName]);
+
+    if (data.length > 0) {
+        res.json(data[0]);
+    } else {
+        res.status(404).json({ error: "Specified data not found" });
+    }
+});
+
+// POST (Create)
+app.post('/api/:table_name', authenticateToken, checkTableExists, (req, res) => {
+    // Middleware for auth
+    const tableName = req.params.table_name;
+    const newData = req.body;
+
+    if (!newData.key_name) {
+        return res.status(400).json({ error: "Missing 'key_name' in request body." });
+    }
+
+    const existing = alasql(`SELECT * FROM ${tableName} WHERE key_name = ?`, [newData.key_name]);
+    if (existing.length > 0) {
+        return res.status(409).json({ error: "Data already exists." });
+    }
+
+    alasql(`INSERT INTO ${tableName} VALUES ?`, [newData]);
+    saveTable(tableName);
+
+    res.status(201).json({ message: "Data created", data: newData });
+});
+
+// PUT (Update)
+app.put('/api/:table_name/:key_name', authenticateToken, checkTableExists, (req, res) => {
+    // Middleware for auth
+    const tableName = req.params.table_name;
+    const keyName = req.params.key_name;
+    const newData = req.body;
+
+    const existing = alasql(`SELECT * FROM ${tableName} WHERE key_name = ?`, [keyName]);
+    if (!existing.length) {
+        return res.status(404).json({ error: "Data doesn't exist." });
+    }
+
+    // Update the record directly in the in-memory array for safety and simplicity
+    const tableData = alasql.tables[tableName].data;
+    const rowIndex = tableData.findIndex(row => row.key_name === keyName);
     
-    console.log(`Example app listening on port ${port}`);
+    if (rowIndex !== -1) {
+        tableData[rowIndex] = { ...tableData[rowIndex], ...newData, key_name: keyName };
+        saveTable(tableName);
+        res.json({ message: "Data updated", data: tableData[rowIndex] });
+    } else {
+        res.status(404).json({ error: "Data not found." });
+    }
+});
+
+// DELETE
+app.delete('/api/:table_name/:key_name', authenticateToken, checkTableExists, (req, res) => {
+    // Middleware for auth
+    const tableName = req.params.table_name;
+    const keyName = req.params.key_name;
+
+    const existing = alasql(`SELECT * FROM ${tableName} WHERE key_name = ?`, [keyName]);
+    if (!existing.length) {
+        return res.status(404).json({ error: "Data doesn't exist." });
+    }
+
+    alasql(`DELETE FROM ${tableName} WHERE key_name = ?`, [keyName]);
+    saveTable(tableName);
+
+    res.json({ message: "Data deleted" });
+});
+
+app.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`);
+    const versionInfo = alasql(`SELECT * FROM version;`);
+    console.log(versionInfo);
 });
