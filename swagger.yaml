@@ -1,0 +1,241 @@
+openapi: 3.0.0
+info:
+  title: MyAPI
+  version: 1.0.0
+  description: API documentation for MyAPI (Minecraft Data)
+servers:
+  - url: http://localhost:8080
+    description: Local server
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+security:
+  - bearerAuth: []
+
+paths:
+  /health:
+    get:
+      summary: Health Check
+      security: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Ok
+                  date:
+                    type: string
+
+  /register:
+    post:
+      summary: Register a new user
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - password
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '201':
+          description: User registered (Redirects to /login)
+        '401':
+          description: Invalid parameters or user already exists
+
+  /login:
+    post:
+      summary: Login to get a JWT token
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - password
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '201':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  token:
+                    type: string
+        '401':
+          description: Login failed
+
+  /api/{table_name}:
+    get:
+      summary: Get multiple records with pagination and filtering
+      security: []
+      parameters:
+        - in: path
+          name: table_name
+          required: true
+          schema:
+            type: string
+          description: Name of the table/collection (e.g., blocks, items)
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+          description: Page number
+        - in: query
+          name: "*_like"
+          schema:
+            type: string
+          description: Partial search query (e.g., name_like=dirt)
+      responses:
+        '200':
+          description: A list of records
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  page:
+                    type: integer
+                  limit:
+                    type: integer
+                  totalItems:
+                    type: integer
+                  totalPages:
+                    type: integer
+                  data:
+                    type: array
+                    items:
+                      type: object
+
+    post:
+      summary: Create a new record
+      parameters:
+        - in: path
+          name: table_name
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - key_name
+              properties:
+                key_name:
+                  type: string
+              additionalProperties: true
+      responses:
+        '201':
+          description: Record created
+        '400':
+          description: Missing key_name
+        '401':
+          description: Unauthorized
+        '409':
+          description: Data already exists
+
+  /api/{table_name}/{key_name}:
+    get:
+      summary: Get a single record by key_name
+      security: []
+      parameters:
+        - in: path
+          name: table_name
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: key_name
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Record data
+          content:
+            application/json:
+              schema:
+                type: object
+        '404':
+          description: Record not found
+
+    put:
+      summary: Update a record
+      parameters:
+        - in: path
+          name: table_name
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: key_name
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '200':
+          description: Record updated
+        '401':
+          description: Unauthorized
+        '404':
+          description: Record not found
+
+    delete:
+      summary: Delete a record
+      parameters:
+        - in: path
+          name: table_name
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: key_name
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Record deleted
+        '401':
+          description: Unauthorized
+        '404':
+          description: Record not found

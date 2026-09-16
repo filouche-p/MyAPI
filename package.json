@@ -1,18 +1,22 @@
 {
     "dependencies": {
-        "alasql": "^4.19.1",
         "assert": "^2.1.0",
         "bcrypt": "^6.0.0",
         "dotenv": "^17.4.2",
         "express": "^5.2.1",
-        "jsonwebtoken": "^9.0.3"
+        "jsonwebtoken": "^9.0.3",
+        "mongodb": "^7.6.0",
+        "picocolors": "^1.1.1",
+        "redis": "^6.2.1",
+        "swagger-ui-express": "^5.0.1",
+        "yaml": "^2.9.1"
     },
     "name": "myapi",
     "version": "0.5.0",
     "main": "index.js",
     "scripts": {
         "start": "node index.js",
-        "test": "echo \"Error: no test specified\" && exit 1"
+        "test": "newman run tests/postman_collection.json"
     },
     "repository": {
         "type": "git",
@@ -28,5 +32,9 @@
     "type": "module",
     "allowScripts": {
         "bcrypt@6.0.0": true
+    },
+    "devDependencies": {
+        "concurrently": "^10.0.5",
+        "newman": "^6.2.2"
     }
 }

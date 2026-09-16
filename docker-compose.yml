@@ -10,6 +10,31 @@ services:
 
       env_file:
         - .env
+      
+      environment:
+        - REDIS_URL=redis://redis:6379
+        - MONGO_URL=mongodb://mongodb:27017/myapi
 
       volumes:
-        - ./data:/app/data
+        - ./db:/app/db
+      depends_on:
+        - redis
+        - mongodb
+
+    redis:
+      image: redis:alpine
+      container_name: redis-cache
+      ports:
+        - "6379:6379"
+
+    mongodb:
+      image: mongo:latest
+      container_name: mongodb-data
+      restart: always
+      ports:
+        - "27017:27017"
+      volumes:
+        - mongodb_data:/data/db
+
+volumes:
+  mongodb_data:
