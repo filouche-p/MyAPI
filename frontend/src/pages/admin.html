@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../css/style.css">
+    <title>Administration API</title>
+
+</head>
+<body>
+    <header>
+        <h1>Administration de l'API</h1>
+        <nav><a href="/">&larr; Retour à l'accueil</a></nav>
+        <p>Cette page est réservée aux utilisateurs ayant le rôle <strong>admin</strong>.</p>
+        <button id="check-auth" style="background:#10b981;">Vérifier mon rôle</button>
+        <span id="auth-status"></span>
+    </header>
+    <hr>
+    <main>
+        <section>
+            <h2>Modifier les données (POST, PUT, DELETE)</h2>
+            <form id="admin-form">
+                <div class="form-group">
+                    <label for="method">Méthode HTTP :</label>
+                    <select id="method" name="method">
+                        <option value="POST">POST (Créer)</option>
+                        <option value="PUT">PUT (Modifier)</option>
+                        <option value="DELETE">DELETE (Supprimer)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="route">Route (ex: blocks ou blocks/1) :</label>
+                    <input type="text" id="route" name="route" placeholder="blocks/1" required />
+                </div>
+                <div class="form-group" id="body-group">
+                    <label for="body">Corps de la requête (JSON) :</label>
+                    <textarea id="body" name="body" placeholder='{&#10;  "key_name": "1",&#10;  "name": "stone"&#10;}'></textarea>
+                </div>
+                <button type="submit">Envoyer la requête</button>
+            </form>
+        </section>
+        <section>
+            <h2>Réponse :</h2>
+            <pre id="response-output">En attente...</pre>
+        </section>
+    </main>
+
+    <script>
+        // Check Authentication and Role
+        document.getElementById('check-auth').addEventListener('click', async () => {
+            const statusEl = document.getElementById('auth-status');
+            statusEl.textContent = "Vérification...";
+            try {
+                const res = await fetch('/auth/me');
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.user && data.user.role === 'admin') {
+                        statusEl.innerHTML = `<span style="color:green;font-weight:bold;">Connecté en tant que ${data.user.username} (Admin) ✅</span>`;
+                    } else {
+                        statusEl.innerHTML = `<span style="color:orange;font-weight:bold;">Connecté en tant que ${data.user ? data.user.username : 'inconnu'} (${data.user ? data.user.role : 'sans rôle'}) ❌ Tu n'es pas admin.</span>`;
+                    }
+                } else {
+                    statusEl.innerHTML = `<span style="color:red;font-weight:bold;">Non connecté ❌</span>`;
+                }
+            } catch (err) {
+                statusEl.textContent = "Erreur de connexion";
+            }
+        });
+
+        // Hide body for DELETE
+        document.getElementById('method').addEventListener('change', (e) => {
+            const bodyGroup = document.getElementById('body-group');
+            if (e.target.value === 'DELETE') {
+                bodyGroup.style.display = 'none';
+            } else {
+                bodyGroup.style.display = 'block';
+            }
+        });
+
+        // Submit form
+        document.getElementById('admin-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const method = document.getElementById('method').value;
+            const route = document.getElementById('route').value;
+            const bodyStr = document.getElementById('body').value;
+            const responseOutput = document.getElementById('response-output');
+            
+            responseOutput.textContent = 'Chargement...';
+            
+            const fetchOptions = {
+                method: method,
+                headers: {}
+            };
+            
+            if (method !== 'DELETE') {
+                try {
+                    const parsed = JSON.parse(bodyStr);
+                    fetchOptions.body = JSON.stringify(parsed);
+                    fetchOptions.headers['Content-Type'] = 'application/json';
+                } catch (e) {
+                    responseOutput.textContent = "Erreur : Le JSON fourni est invalide.\n" + e.message;
+                    return;
+                }
+            }
+            
+            try {
+                const url = `/api/${route.replace(/^\//, '')}`;
+                const response = await fetch(url, fetchOptions);
+                const data = await response.json();
+                
+                responseOutput.textContent = `Status: ${response.status}\n\n` + JSON.stringify(data, null, 2);
+            } catch (err) {
+                responseOutput.textContent = 'Erreur lors de la requête : ' + err.message;
+            }
+        });
+    </script>
+</body>
+</html>

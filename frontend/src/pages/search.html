@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../css/style.css">
+    <title>Recherche API</title>
+
+</head>
+<body>
+    <header>
+        <h1>Recherche dans l'API</h1>
+        <nav><a href="/">&larr; Retour à l'accueil</a></nav>
+    </header>
+    <main>
+        <section>
+            <form id="search-form">
+                <div class="form-group">
+                    <label for="collection">Collection :</label>
+                    <select id="collection" name="collection" required>
+                        <option value="blocks">Blocks</option>
+                        <option value="items">Items</option>
+                        <option value="biomes">Biomes</option>
+                        <option value="entities">Entities</option>
+                        <option value="recipes">Recipes</option>
+                        <option value="enchantments">Enchantments</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="query">Recherche (ex: name_like=stone, ou laissez vide pour tout voir) :</label>
+                    <input type="text" id="query" name="query" placeholder="name_like=stone" />
+                </div>
+                <div class="form-group">
+                    <label for="page">Numéro de la page :</label>
+                    <input type="number" id="page" name="page" value="1" min="1" />
+                </div>
+                <button type="submit">Rechercher</button>
+            </form>
+        </section>
+        <section>
+            <h2>Résultats :</h2>
+            <pre id="results">Aucun résultat pour le moment.</pre>
+        </section>
+    </main>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const collectionSelect = document.getElementById('collection');
+            const blacklist = ['users', 'deleted_records'];
+            
+            try {
+                const response = await fetch('/api/collections');
+                if (response.ok) {
+                    const collections = await response.json();
+                    
+                    // Clear existing options
+                    collectionSelect.innerHTML = '';
+                    
+                    // Populate select dynamically
+                    collections.forEach(col => {
+                        if (!blacklist.includes(col)) {
+                            const option = document.createElement('option');
+                            option.value = col;
+                            option.textContent = col.charAt(0).toUpperCase() + col.slice(1);
+                            collectionSelect.appendChild(option);
+                        }
+                    });
+                }
+            } catch (err) {
+                console.error("Erreur chargement des collections:", err);
+            }
+        });
+
+        document.getElementById('search-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const collection = document.getElementById('collection').value;
+            const query = document.getElementById('query').value;
+            const page = document.getElementById('page').value || 1;
+            const resultsEl = document.getElementById('results');
+            
+            resultsEl.textContent = 'Recherche en cours...';
+            
+            try {
+                let params = query ? query + `&page=${page}` : `page=${page}`;
+                const url = `/api/${collection}?${params}`;
+                const response = await fetch(url);
+                const data = await response.json();
+                resultsEl.textContent = JSON.stringify(data, null, 2);
+            } catch (err) {
+                resultsEl.textContent = 'Erreur lors de la requête : ' + err.message;
+            }
+        });
+    </script>
+</body>
+</html>

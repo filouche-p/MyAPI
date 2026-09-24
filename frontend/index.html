@@ -3,27 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="./style.css">
-    <title>Login</title>
+    <title>Accueil - MyAPI</title>
 </head>
 <body>
-    <main class="m-4">
-        <h1 class="underline font-bold text-xl">Welcome to My API</h1>
-        <div class="m-4 text-lg">
-            <ul>
-                <li><a href="https://github.com/PrismarineJS/minecraft-data">Data</a></li>
-                <li><a href="http://localhost:8080/api-docs">Swagger Docs</a></li>
-                <li><a href="../../../README.md">Readme</a></li>
-                <li><a href="https://github.com/filouche-p">My github</a></li>
-            </ul>
-        </div>
+    <header>
+        <h1>Bienvenue sur MyAPI</h1>
+        <p>Ceci est le portail d'accueil de Minecraft API.</p>
+    </header>
+
+    <main>
+        <section aria-labelledby="frontend-pages-title">
+            <h2 id="frontend-pages-title">Pages Frontend</h2>
+            <nav aria-label="Navigation des pages frontend">
+                <ul>
+                    <li><a href="/src/pages/login.html">Page de Connexion</a></li>
+                    <li><a href="/src/pages/register.html">Page d'Inscription</a></li>
+                    <li><a href="/src/pages/search.html">Recherche dans l'API (Public)</a></li>
+                    <li><a href="/src/pages/admin.html">Administration (Admin uniquement)</a></li>
+                    <li><a href="/src/pages/test.html">Page de test</a></li>
+                </ul>
+            </nav>
+        </section>
+
+        <section aria-labelledby="backend-links-title">
+            <h2 id="backend-links-title">Ressources Utiles</h2>
+            <nav aria-label="Navigation des ressources utiles">
+                <ul>
+                    <li><a href="/api/">Racine de l'API Backend</a></li>
+                    <li><a href="/api-docs">Documentation Swagger</a></li>
+                    <li><a href="/api/readme">Voir le README</a></li>
+                    <li><a href="https://github.com/PrismarineJS/minecraft-data" target="_blank" rel="noopener noreferrer">Source des données Minecraft</a></li>
+                </ul>
+            </nav>
+        </section>
     </main>
-    <footer class="text-center border-t-2 border-sky-100 text-xl bg-gray-100 py-8 px-4 text-sm text-gray-500 font-sans">
-        <p> Made by 
-            <a href="https://github.com/filouche-p" target="_blank" rel="noopener noreferrer" class="text-gray-900 animate-pulse font-semibold transition-colors duration-200 hover:text-purple-500 hover:underline">
-            filouche</a> 
-            with <span class="text-red-500 text-3xl inline-block cursor-context-menu" aria-label="love">&hearts;</span>
-        </p>
+
+    <footer>
+        <hr>
+        <p>Créé par <a href="https://github.com/filouche-p" target="_blank" rel="noopener noreferrer">filouche</a>.</p>
     </footer>
 </body>
 </html>

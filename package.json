@@ -2,10 +2,18 @@
     "dependencies": {
         "assert": "^2.1.0",
         "bcrypt": "^6.0.0",
+        "cookie-parser": "^1.4.7",
+        "cors": "^2.8.6",
         "dotenv": "^17.4.2",
         "express": "^5.2.1",
+        "express-rate-limit": "^8.7.0",
+        "google-auth-library": "^11.1.0",
+        "helmet": "^8.3.0",
+        "image-size": "^2.0.4",
+        "jimp": "^1.6.1",
         "jsonwebtoken": "^9.0.3",
         "mongodb": "^7.6.0",
+        "node-cron": "^4.6.0",
         "picocolors": "^1.1.1",
         "redis": "^6.2.1",
         "swagger-ui-express": "^5.0.1",
@@ -13,10 +21,12 @@
     },
     "name": "myapi",
     "version": "0.5.0",
-    "main": "index.js",
+    "main": "src/index.js",
     "scripts": {
-        "start": "node index.js",
-        "test": "newman run tests/postman_collection.json"
+        "prestart": "node scripts/fetch_minecraft_data.js",
+        "start": "node src/index.js",
+        "test": "npm run test:unit && newman run tests/postman_collection.json",
+        "test:unit": "NODE_OPTIONS=--experimental-vm-modules jest"
     },
     "repository": {
         "type": "git",
@@ -31,10 +41,20 @@
     "homepage": "https://github.com/filouche-p/MyAPI#readme",
     "type": "module",
     "allowScripts": {
-        "bcrypt@6.0.0": true
+        "bcrypt@6.0.0": true,
+        "@parcel/watcher@2.6.0": true,
+        "@scarf/scarf@1.4.0": true,
+        "unrs-resolver@1.12.2": true
     },
     "devDependencies": {
         "concurrently": "^10.0.5",
+        "jest": "^30.5.1",
         "newman": "^6.2.2"
+    },
+    "jest": {
+        "testPathIgnorePatterns": [
+            "/node_modules/",
+            "/frontend/"
+        ]
     }
 }

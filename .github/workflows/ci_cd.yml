@@ -7,39 +7,94 @@ on:
     branches: [ "main", "master" ]
 
 jobs:
-  build-and-test:
+  unit-tests:
+    name: Run Unit Tests
     runs-on: ubuntu-latest
-
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
-
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
         node-version: '20'
+    - name: Install dependencies
+      run: npm install
+    - name: Run Unit Tests
+      run: npm run test:unit
 
+  api-tests:
+    name: Run API Tests (Newman)
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
     - name: Create .env file
       run: cp .env.example .env
-
     - name: Start infrastructure and API (Docker Compose)
-      run: |
-        # Build and start MongoDB, Redis, and the API container
-        # The Dockerfile automatically builds the Vite frontend
-        docker compose up -d --build
-
-    - name: Install Newman (API Testing)
-      run: npm install
-
+      run: docker compose up -d --build
     - name: Wait for API to be ready
       run: |
         echo "Waiting for API to be accessible..."
-        # Wait until the /health endpoint responds (up to 30 seconds)
-        curl --retry 6 --retry-connrefused --retry-delay 5 -f http://localhost:8080/health || (echo "API failed to start" && docker compose logs && exit 1)
-
-    - name: Run API Tests
-      run: npm test
-
+        curl --retry 6 --retry-connrefused --retry-delay 5 -f http://localhost:8080/health || (echo "API failed to start" && docker compose logs express-api && exit 1)
+    - name: Wait for API Tests to finish and check result
+      run: |
+        EXIT_CODE=$(docker wait api-tests)
+        docker compose logs api-tests
+        if [ "$EXIT_CODE" -ne 0 ]; then
+          echo "API Tests failed with exit code $EXIT_CODE"
+          exit 1
+        else
+          echo "API Tests passed successfully!"
+        fi
     - name: Tear down Docker Compose
       if: always()
       run: docker compose down
+  
+  deploy-to-ec2:
+    name: Deploy to EC2
+    runs-on: ubuntu-latest
+    needs: [unit-tests, api-tests]
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Deploying using SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            REPO_DIR="/home/${{ secrets.EC2_USERNAME }}/MyAPI"
+            
+            if [ ! -d "$REPO_DIR" ]; then
+              echo "Cloning repository..."
+              git clone https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git $REPO_DIR
+              cd $REPO_DIR
+            else
+              echo "Updating repository..."
+              cd $REPO_DIR
+              git remote set-url origin https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git
+              git pull origin main
+            fi
+
+            
+            cat << 'ENVEOF' > .env
+            NODE_ENV=production
+            DOMAIN_NAME=${{ secrets.EC2_HOST }}
+            PORT=8080
+            FRONTEND_PORT=80
+            PAGE_LIMIT=20
+            JWT_SECRET=${{ secrets.PROD_JWT_SECRET }}
+            GOOGLE_CLIENT_ID=${{ secrets.PROD_GOOGLE_CLIENT_ID }}
+            GOOGLE_CLIENT_SECRET=${{ secrets.PROD_GOOGLE_CLIENT_SECRET }}
+            GOOGLE_REDIRECT_URI=https://${{ secrets.EC2_HOST }}/auth/google/callback
+            FRONTEND_URL=https://${{ secrets.EC2_HOST }}
+            REDIS_PASSWORD=${{ secrets.PROD_REDIS_PASSWORD }}
+            REDIS_URL=redis://:${{ secrets.PROD_REDIS_PASSWORD }}@redis:6379
+            CACHE_TTL=60
+            MONGO_ROOT_USER=admin
+            MONGO_ROOT_PASSWORD=${{ secrets.PROD_MONGO_PASSWORD }}
+            MONGO_URL=mongodb://admin:${{ secrets.PROD_MONGO_PASSWORD }}@mongodb:27017/myapi?authSource=admin
+            ENVEOF
+            
+            docker compose down
+            docker compose up -d --build

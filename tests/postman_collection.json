@@ -10,12 +10,10 @@
         "method": "GET",
         "header": [],
         "url": {
-          "raw": "http://localhost:8080/health",
-          "protocol": "http",
+          "raw": "{{baseUrl}}/health",
           "host": [
-            "localhost"
+            "{{baseUrl}}"
           ],
-          "port": "8080",
           "path": [
             "health"
           ]
@@ -29,11 +27,8 @@
               "if (pm.response.code !== 200) {",
               "    pm.execution.setNextRequest(null);",
               "}",
-              "pm.test(\"Test success(Status 200)\", function () {",
+              "pm.test(\"Test success (Status 200)\", function () {",
               "    pm.response.to.have.status(200);",
-              "});",
-              "pm.test(\"Test fail (Status 500)\", function () {",
-              "    pm.response.to.have.status(500);",
               "});"
             ],
             "type": "text/javascript"
@@ -47,12 +42,10 @@
         "method": "GET",
         "header": [],
         "url": {
-          "raw": "http://localhost:8080/api/blocks",
-          "protocol": "http",
+          "raw": "{{baseUrl}}/api/blocks",
           "host": [
-            "localhost"
+            "{{baseUrl}}"
           ],
-          "port": "8080",
           "path": [
             "api",
             "blocks"
@@ -64,12 +57,8 @@
           "listen": "test",
           "script": {
             "exec": [
-              "pm.test(\"Test sucess (Status 200)\", function () {",
+              "pm.test(\"Test success (Status 200)\", function () {",
               "    pm.response.to.have.status(200);",
-              "});",
-              "pm.test(\"Test fail (Expect empty array)\", function () {",
-              "    var jsonData = pm.response.json();",
-              "    pm.expect(jsonData.data).to.be.empty;",
               "});"
             ],
             "type": "text/javascript"
@@ -83,19 +72,17 @@
         "method": "GET",
         "header": [],
         "url": {
-          "raw": "http://localhost:8080/api/blocks?name_like=dirt",
-          "protocol": "http",
+          "raw": "{{baseUrl}}/api/blocks?key_name_like=dirt",
           "host": [
-            "localhost"
+            "{{baseUrl}}"
           ],
-          "port": "8080",
           "path": [
             "api",
             "blocks"
           ],
           "query": [
             {
-              "key": "name_like",
+              "key": "key_name_like",
               "value": "dirt"
             }
           ]
@@ -106,12 +93,8 @@
           "listen": "test",
           "script": {
             "exec": [
-              "pm.test(\"Test sucess (Status 200)\", function () {",
+              "pm.test(\"Test success (Status 200)\", function () {",
               "    pm.response.to.have.status(200);",
-              "});",
-              "pm.test(\"Test fail (Expect 0 results)\", function () {",
-              "    var jsonData = pm.response.json();",
-              "    pm.expect(jsonData.data.length).to.eql(0);",
               "});"
             ],
             "type": "text/javascript"
@@ -125,12 +108,10 @@
         "method": "GET",
         "header": [],
         "url": {
-          "raw": "http://localhost:8080/api/invalid_table_name",
-          "protocol": "http",
+          "raw": "{{baseUrl}}/api/invalid_table_name",
           "host": [
-            "localhost"
+            "{{baseUrl}}"
           ],
-          "port": "8080",
           "path": [
             "api",
             "invalid_table_name"
@@ -142,11 +123,8 @@
           "listen": "test",
           "script": {
             "exec": [
-              "pm.test(\"Test sucess (Status 404)\", function () {",
+              "pm.test(\"Test success (Status 404)\", function () {",
               "    pm.response.to.have.status(404);",
-              "});",
-              "pm.test(\"Test fail (Status 200)\", function () {",
-              "    pm.response.to.have.status(200);",
               "});"
             ],
             "type": "text/javascript"
@@ -160,16 +138,14 @@
         "method": "GET",
         "header": [],
         "url": {
-          "raw": "http://localhost:8080/api/blocks/dirt",
-          "protocol": "http",
+          "raw": "{{baseUrl}}/api/blocks/minecraft:dirt",
           "host": [
-            "localhost"
+            "{{baseUrl}}"
           ],
-          "port": "8080",
           "path": [
             "api",
             "blocks",
-            "dirt"
+            "minecraft:dirt"
           ]
         }
       },
@@ -178,11 +154,8 @@
           "listen": "test",
           "script": {
             "exec": [
-              "pm.test(\"Test sucess (Status 200 ou 404 si non trouvé)\", function () {",
+              "pm.test(\"Test success (Status 200 ou 404 si non trouvé)\", function () {",
               "    pm.expect(pm.response.code).to.be.oneOf([200, 404]);",
-              "});",
-              "pm.test(\"Test fail (Expect 500)\", function () {",
-              "    pm.response.to.have.status(500);",
               "});"
             ],
             "type": "text/javascript"
@@ -205,12 +178,10 @@
           "raw": "{\n    \"key_name\": \"test_block\",\n    \"name\": \"Test Block\"\n}"
         },
         "url": {
-          "raw": "http://localhost:8080/api/blocks",
-          "protocol": "http",
+          "raw": "{{baseUrl}}/api/blocks",
           "host": [
-            "localhost"
+            "{{baseUrl}}"
           ],
-          "port": "8080",
           "path": [
             "api",
             "blocks"
@@ -222,11 +193,8 @@
           "listen": "test",
           "script": {
             "exec": [
-              "pm.test(\"Test sucess (Status 401 car pas de token)\", function () {",
+              "pm.test(\"Test success (Status 401 car pas de token)\", function () {",
               "    pm.response.to.have.status(401);",
-              "});",
-              "pm.test(\"Test fail (Expect 201 created)\", function () {",
-              "    pm.response.to.have.status(201);",
               "});"
             ],
             "type": "text/javascript"
@@ -249,12 +217,10 @@
           "raw": "{\n    \"name\": \"Test Block Updated\"\n}"
         },
         "url": {
-          "raw": "http://localhost:8080/api/blocks/test_block",
-          "protocol": "http",
+          "raw": "{{baseUrl}}/api/blocks/test_block",
           "host": [
-            "localhost"
+            "{{baseUrl}}"
           ],
-          "port": "8080",
           "path": [
             "api",
             "blocks",
@@ -267,11 +233,8 @@
           "listen": "test",
           "script": {
             "exec": [
-              "pm.test(\"Test sucess (Status 401 car pas de token)\", function () {",
+              "pm.test(\"Test success (Status 401 car pas de token)\", function () {",
               "    pm.response.to.have.status(401);",
-              "});",
-              "pm.test(\"Test fail (Expect 200)\", function () {",
-              "    pm.response.to.have.status(200);",
               "});"
             ],
             "type": "text/javascript"
@@ -285,12 +248,10 @@
         "method": "DELETE",
         "header": [],
         "url": {
-          "raw": "http://localhost:8080/api/blocks/test_block",
-          "protocol": "http",
+          "raw": "{{baseUrl}}/api/blocks/test_block",
           "host": [
-            "localhost"
+            "{{baseUrl}}"
           ],
-          "port": "8080",
           "path": [
             "api",
             "blocks",
@@ -303,11 +264,8 @@
           "listen": "test",
           "script": {
             "exec": [
-              "pm.test(\"Test sucess (Status 401 car pas de token)\", function () {",
+              "pm.test(\"Test success (Status 401 car pas de token)\", function () {",
               "    pm.response.to.have.status(401);",
-              "});",
-              "pm.test(\"Test fail (Expect 200)\", function () {",
-              "    pm.response.to.have.status(200);",
               "});"
             ],
             "type": "text/javascript"
