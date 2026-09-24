@@ -73,9 +73,9 @@ services:
       ports:
         - "127.0.0.1:27017:27017"
       volumes:
-        - mongodb_data:/data/db
+        - mongodb_data_v2:/data/db
 
 volumes:
-  mongodb_data:
+  mongodb_data_v2:
   caddy_data:
   caddy_config:
