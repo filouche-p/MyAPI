@@ -125,8 +125,8 @@ async function startServer() {
             console.log(versionInfo);
         }
         
-        // Merge JSON data potentially downloaded by 'npm run prestart' in the background
-        mergeDatabaseWithJSON().catch(err => console.error('Error during background merge:', err));
+        // Run full Minecraft update process in the background (fetches and merges)
+        runMinecraftUpdate().catch(err => console.error('Error during background update:', err));
 
         // Cron job: Fetch Minecraft data every Wednesday at 3:00 AM
         cron.schedule('0 3 * * 3', () => {

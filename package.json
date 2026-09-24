@@ -23,7 +23,6 @@
     "version": "0.5.0",
     "main": "src/index.js",
     "scripts": {
-        "prestart": "node scripts/fetch_minecraft_data.js",
         "start": "node src/index.js",
         "test": "npm run test:unit && newman run tests/postman_collection.json",
         "test:unit": "NODE_OPTIONS=--experimental-vm-modules jest"
