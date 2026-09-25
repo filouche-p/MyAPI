@@ -86,7 +86,7 @@ jobs:
             JWT_SECRET=${{ secrets.PROD_JWT_SECRET }}
             GOOGLE_CLIENT_ID=${{ secrets.PROD_GOOGLE_CLIENT_ID }}
             GOOGLE_CLIENT_SECRET=${{ secrets.PROD_GOOGLE_CLIENT_SECRET }}
-            GOOGLE_REDIRECT_URI=https://${{ secrets.EC2_HOST }}/api/auth/google/callback
+            GOOGLE_REDIRECT_URI=https://${{ secrets.EC2_HOST }}/auth/google/callback
             FRONTEND_URL=https://${{ secrets.EC2_HOST }}
             REDIS_PASSWORD=${{ secrets.PROD_REDIS_PASSWORD }}
             REDIS_URL=redis://:${{ secrets.PROD_REDIS_PASSWORD }}@redis:6379
