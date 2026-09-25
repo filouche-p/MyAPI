@@ -88,12 +88,12 @@ app.get('/health', (req, res) => {
 // Mount Routes
 app.use('/', authRoutes); // /login, /register, /logout, /google
 app.use('/auth', authRoutes); // /auth/login, /auth/google, etc.
-app.use('/api', apiRoutes); // /api/:table_name
-
 // README endpoint
 app.get('/api/readme', (req, res) => {
     res.sendFile(path.join(__dirname, '../README.md'));
 });
+
+app.use('/api', apiRoutes); // /api/:table_name
 
 // Admin route
 app.post('/api/admin/force-update', authenticateToken, async (req, res) => {

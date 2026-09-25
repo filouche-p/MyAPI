@@ -3,26 +3,26 @@
     # Dossier où les fichiers buildés de l'application sont servis
     root * /srv
     
-    # Serve backend API routes first
+    # Routes strictly for the backend API
     handle /api/* {
-        reverse_proxy http://express-api:8080
-    }
-    handle /login* {
-        reverse_proxy http://express-api:8080
-    }
-    handle /register* {
-        reverse_proxy http://express-api:8080
-    }
-    handle /logout* {
-        reverse_proxy http://express-api:8080
-    }
-    handle /auth* {
         reverse_proxy http://express-api:8080
     }
     handle /api-docs* {
         reverse_proxy http://express-api:8080
     }
     handle /health* {
+        reverse_proxy http://express-api:8080
+    }
+    handle /auth* {
+        reverse_proxy http://express-api:8080
+    }
+
+    # API calls for login/register/logout are POST only
+    @api_post_auth {
+        method POST
+        path /login /register /logout
+    }
+    handle @api_post_auth {
         reverse_proxy http://express-api:8080
     }
 
