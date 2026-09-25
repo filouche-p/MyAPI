@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+# Décommente la ligne ci-dessous (et commente celle du dessus) si tu veux empêcher l'indexation de ton front-end :
+# Disallow: /

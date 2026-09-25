@@ -3,16 +3,32 @@
     # Dossier où les fichiers buildés de l'application sont servis
     root * /srv
     
-    # Gestion du routage SPA (Single Page Application)
-    try_files {path} {path}/ {path}.html /index.html
-    file_server
+    # Serve backend API routes first
+    handle /api/* {
+        reverse_proxy http://express-api:8080
+    }
+    handle /login* {
+        reverse_proxy http://express-api:8080
+    }
+    handle /register* {
+        reverse_proxy http://express-api:8080
+    }
+    handle /logout* {
+        reverse_proxy http://express-api:8080
+    }
+    handle /auth* {
+        reverse_proxy http://express-api:8080
+    }
+    handle /api-docs* {
+        reverse_proxy http://express-api:8080
+    }
+    handle /health* {
+        reverse_proxy http://express-api:8080
+    }
 
-    # Reverse proxy vers le backend Express pour toutes les routes API et auth
-    reverse_proxy /api/* http://express-api:8080
-    reverse_proxy /login* http://express-api:8080
-    reverse_proxy /register* http://express-api:8080
-    reverse_proxy /logout* http://express-api:8080
-    reverse_proxy /auth* http://express-api:8080
-    reverse_proxy /api-docs* http://express-api:8080
-    reverse_proxy /health* http://express-api:8080
+    # Match everything else and handle SPA routing
+    handle {
+        try_files {path} {path}/ {path}.html /index.html
+        file_server
+    }
 }
