@@ -3,44 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/src/css/style.css">
     <title>Accueil - MyAPI</title>
 </head>
-<body>
-    <header>
-        <h1>Bienvenue sur MyAPI</h1>
-        <p>Ceci est le portail d'accueil de Minecraft API.</p>
+<body class="bg-[#1E1E1E] text-white font-minecraft">
+    <header class="flex flex-col justify-center text-center underline underline-offset-4 text-2xl mt-4">
+        <h1 class="my-2 text-xl underline underline-offset-4">Bienvenue sur MyAPI</h1>
+        <p class="my-2 text-lg text-zinc-400">Ceci est le portail d'accueil de Minecraft API.</p>
     </header>
 
-    <main>
-        <section aria-labelledby="frontend-pages-title">
-            <h2 id="frontend-pages-title">Pages Frontend</h2>
+    <main class="flex gap-4 place-content-between">
+        <section aria-labelledby="frontend-pages-title" class="m-8 mt-16">
+            <h2 class="text-lg underline" id="frontend-pages-title">Pages Frontend :</h2>
             <nav aria-label="Navigation des pages frontend">
-                <ul>
-                    <li><a href="/src/pages/login.html">Page de Connexion</a></li>
-                    <li><a href="/src/pages/register.html">Page d'Inscription</a></li>
-                    <li><a href="/src/pages/search.html">Recherche dans l'API (Public)</a></li>
-                    <li><a href="/src/pages/admin.html">Administration (Admin uniquement)</a></li>
-                    <li><a href="/src/pages/test.html">Page de test</a></li>
+                <ul class="text-blue-400 list-disc px-8">
+                    <li><a class="hover:underline" href="/src/pages/login.html">Page de Connexion</a></li>
+                    <li><a class="hover:underline" href="/src/pages/register.html">Page d'Inscription</a></li>
+                    <li><a class="hover:underline" href="/src/pages/search.html">Recherche dans l'API (Public)</a></li>
+                    <li><a class="hover:underline" href="/src/pages/admin.html">Administration (Admin uniquement)</a></li>
                 </ul>
             </nav>
         </section>
 
-        <section aria-labelledby="backend-links-title">
-            <h2 id="backend-links-title">Ressources Utiles</h2>
+        <section aria-labelledby="backend-links-title" class="m-8 mt-16">
+            <h2 id="backend-links-title" class="text-lg underline">Ressources Utiles :</h2>
             <nav aria-label="Navigation des ressources utiles">
-                <ul>
-                    <li><a href="/api/">Racine de l'API Backend</a></li>
-                    <li><a href="/api-docs">Documentation Swagger</a></li>
-                    <li><a href="/api/readme">Voir le README</a></li>
-                    <li><a href="https://github.com/PrismarineJS/minecraft-data" target="_blank" rel="noopener noreferrer">Source des données Minecraft</a></li>
+                <ul class="text-blue-400 list-disc px-8">
+                    <li><a class="hover:underline" href="https://github.com/filouche-p">Github</a></li>
+                    <li><a class="hover:underline" href="/api-docs">Documentation Swagger</a></li>
+                    <li><a class="hover:underline" href="/api/readme">Voir le README</a></li>
+                    <li><a class="hover:underline" href="https://github.com/PrismarineJS/minecraft-data" target="_blank" rel="noopener noreferrer">Source des données Minecraft</a></li>
                 </ul>
             </nav>
         </section>
     </main>
 
-    <footer>
-        <hr>
-        <p>Créé par <a href="https://github.com/filouche-p" target="_blank" rel="noopener noreferrer">filouche</a>.</p>
+    <footer class="text-center text-xl py-8 px-4 text-sm text-gray-500 font-sans">
+        <p> Made by
+            <a href="https://github.com/filouche-p" target="_blank" rel="noopener noreferrer" class="animate-pulse font-semibold transition-colors duration-200 hover:text-purple-500 hover:underline">
+            filouche</a> 
+            with <span class="text-red-500 text-3xl inline-block" aria-label="love">&hearts;</span>
+        </p>
     </footer>
 </body>
 </html>

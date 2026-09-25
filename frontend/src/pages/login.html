@@ -6,28 +6,36 @@
     <link rel="stylesheet" href="../css/style.css">
     <title>Login</title>
 </head>
-<body>
+<body class="bg-[#1E1E1E] text-[#DEDEDE] font-minecraft">
+    <nav class="absolute top-4 left-4">
+        <a href="/" class="text-blue-400 hover:underline">&larr; Retour à l'accueil</a>
+    </nav>
     <main>
-        <h1>Connexion</h1>
-        <form id="login-form">
-            <div>
-                <label for="username">Username :</label>
-                <input type="text" name="username" id="username" required />
+        <h1 class="flex flex-col items-center justify-center text-center underline underline-offset-4 text-2xl mt-4">Connexion</h1>
+        <form id="login-form" class="mt-16">
+            <div class="m-4">
+                <div class="text-center items-center ml-4">
+                    <label for="username">Username :</label>
+                    <input class="border border-2 p-2 m-2 max-w-1/3 bg-[#1E1E1E] focus:border-blue-400 focus:outline-none rounded" type="text" name="username" id="username" required />
+                </div>
+                <div class="text-center items-center ml-4 mt-2">
+                    <label for="password">Password :</label>
+                    <input class="border border-2 p-2 m-2 max-w-1/3 bg-[#1E1E1E] focus:border-blue-400 focus:outline-none rounded" type="password" name="password" id="password" required />
+                </div>
             </div>
-            <div>
-                <label for="password">Password :</label>
-                <input type="password" name="password" id="password" required />
+
+            <div class="flex flex-col items-center justify-center text-center gap-4 mt-8">
+                <div>
+                    <button class="border-[#DEDEDE] border-2 rounded-full m-2 px-4 py-2 hover:bg-[#DEDEDE] hover:text-[#1E1E1E] transition" type="submit">Se connecter</button>
+                </div>
+                <div>
+                    <a class="border-[#DEDEDE] border-2 rounded-full m-2 px-4 py-2 inline-block hover:bg-[#DEDEDE] hover:text-[#1E1E1E] transition" href="/auth/google">Se connecter avec Google</a>
+                </div>
+                <div>
+                    <p class="mt-4">Pas encore de compte ? <a class="text-blue-400 hover:underline" href="/src/pages/register.html">S'inscrire</a></p>
+                </div>
             </div>
-            <div>
-                <button type="submit">Se connecter</button>
-            </div>
-            <div>
-                <a href="/auth/google">Se connecter avec Google</a>
-            </div>
-            <div>
-                <p>Pas encore de compte ? <a href="/src/pages/register.html">S'inscrire</a></p>
-            </div>
-            <p class="" id="error-msg"></p>
+            <p class="text-center mt-4 text-red-500" id="error-msg"></p>
         </form>
         <script type="module" src="../js/login.js"></script>
     </main>

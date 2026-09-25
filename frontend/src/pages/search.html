@@ -5,19 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../css/style.css">
     <title>Recherche API</title>
-
 </head>
-<body>
-    <header>
-        <h1>Recherche dans l'API</h1>
-        <nav><a href="/">&larr; Retour à l'accueil</a></nav>
+<body class="bg-[#1E1E1E] text-[#DEDEDE] font-minecraft p-8">
+    <header class="mb-8">
+        <h1 class="text-3xl underline underline-offset-4 mb-4">Recherche dans l'API</h1>
+        <nav class="mb-4"><a href="/" class="text-blue-400 hover:underline">&larr; Retour à l'accueil</a></nav>
     </header>
-    <main>
-        <section>
-            <form id="search-form">
-                <div class="form-group">
-                    <label for="collection">Collection :</label>
-                    <select id="collection" name="collection" required>
+    <main class="grid md:grid-cols-2 gap-8">
+        <section class="border border-zinc-700 p-6 rounded-lg bg-zinc-900/50 h-fit">
+            <form id="search-form" class="flex flex-col gap-4">
+                <div class="form-group flex flex-col">
+                    <label for="collection" class="mb-1">Collection :</label>
+                    <select id="collection" name="collection" required class="bg-[#1E1E1E] border border-zinc-500 p-2 rounded focus:border-blue-400 focus:outline-none">
                         <option value="blocks">Blocks</option>
                         <option value="items">Items</option>
                         <option value="biomes">Biomes</option>
@@ -26,20 +25,20 @@
                         <option value="enchantments">Enchantments</option>
                     </select>
                 </div>
-                <div class="form-group">
-                    <label for="query">Recherche (ex: name_like=stone, ou laissez vide pour tout voir) :</label>
-                    <input type="text" id="query" name="query" placeholder="name_like=stone" />
+                <div class="form-group flex flex-col">
+                    <label for="query" class="mb-1">Recherche (ex: name_like=stone, ou vide) :</label>
+                    <input type="text" id="query" name="query" placeholder="name_like=stone" class="bg-[#1E1E1E] border border-zinc-500 p-2 rounded focus:border-blue-400 focus:outline-none" />
                 </div>
-                <div class="form-group">
-                    <label for="page">Numéro de la page :</label>
-                    <input type="number" id="page" name="page" value="1" min="1" />
+                <div class="form-group flex flex-col">
+                    <label for="page" class="mb-1">Numéro de la page :</label>
+                    <input type="number" id="page" name="page" value="1" min="1" class="bg-[#1E1E1E] border border-zinc-500 p-2 rounded focus:border-blue-400 focus:outline-none" />
                 </div>
-                <button type="submit">Rechercher</button>
+                <button type="submit" class="border border-[#DEDEDE] hover:bg-[#DEDEDE] hover:text-[#1E1E1E] p-2 rounded transition mt-4 font-bold">Rechercher</button>
             </form>
         </section>
-        <section>
-            <h2>Résultats :</h2>
-            <pre id="results">Aucun résultat pour le moment.</pre>
+        <section class="border border-zinc-700 p-6 rounded-lg bg-zinc-900/50 flex flex-col min-h-[400px] md:min-h-0">
+            <h2 class="text-xl mb-4 underline underline-offset-4 text-emerald-400">Résultats :</h2>
+            <pre id="results" class="bg-black/80 p-4 rounded overflow-auto flex-grow font-mono text-sm border border-zinc-800 text-zinc-400">Aucun résultat pour le moment.</pre>
         </section>
     </main>
     <script>
@@ -78,14 +77,24 @@
             const resultsEl = document.getElementById('results');
             
             resultsEl.textContent = 'Recherche en cours...';
+            resultsEl.classList.remove('text-green-400', 'text-red-400');
+            resultsEl.classList.add('text-zinc-400');
             
             try {
                 let params = query ? query + `&page=${page}` : `page=${page}`;
                 const url = `/api/${collection}?${params}`;
                 const response = await fetch(url);
                 const data = await response.json();
+                
+                if(response.ok) {
+                    resultsEl.classList.replace('text-zinc-400', 'text-green-400');
+                } else {
+                    resultsEl.classList.replace('text-zinc-400', 'text-red-400');
+                }
+                
                 resultsEl.textContent = JSON.stringify(data, null, 2);
             } catch (err) {
+                resultsEl.classList.replace('text-zinc-400', 'text-red-400');
                 resultsEl.textContent = 'Erreur lors de la requête : ' + err.message;
             }
         });

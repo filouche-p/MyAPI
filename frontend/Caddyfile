@@ -1,6 +1,5 @@
 # Le nom de domaine (ou localhost en dev)
 {$DOMAIN_NAME:localhost} {
-    # Dossier où les fichiers buildés de l'application sont servis
     root * /srv
     
     # Routes strictly for the backend API
