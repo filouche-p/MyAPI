@@ -11,6 +11,8 @@ export default defineConfig({
         login: resolve(import.meta.dirname, 'src/pages/login.html'),
         register: resolve(import.meta.dirname, 'src/pages/register.html'),
         test: resolve(import.meta.dirname, 'src/pages/test.html'),
+        search: resolve(import.meta.dirname, 'src/pages/search.html'),
+        admin: resolve(import.meta.dirname, 'src/pages/admin.html'),
       },
     },
   },
