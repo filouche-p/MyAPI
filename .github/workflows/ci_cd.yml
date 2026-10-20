@@ -63,7 +63,11 @@ jobs:
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
+            set -e
             REPO_DIR="/home/${{ secrets.EC2_USERNAME }}/MyAPI"
+
+            docker image prune -f
+            docker builder prune -f --filter until=72h
             
             if [ ! -d "$REPO_DIR" ]; then
               echo "Cloning repository..."
@@ -98,3 +102,5 @@ jobs:
             
             docker compose down
             docker compose up -d --build
+
+            docker image prune -f
