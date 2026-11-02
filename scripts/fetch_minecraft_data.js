@@ -39,7 +39,7 @@ export async function fetchLatestMinecraftData() {
     try {
         response = await fetchWithRetry(dataPathsUrl, 5);
     } catch (err) {
-        console.error(pc.red(`𒒬 Update from minecraft-data failed: ${err.message}`));
+        console.error(pc.red(`Update from minecraft-data failed: ${err.message}`));
         return { status: 'error', error: err.message };
     }
     
@@ -49,14 +49,14 @@ export async function fetchLatestMinecraftData() {
     const pcVersions = Object.keys(dataPaths.pc);
     const latestVersion = pcVersions[pcVersions.length - 1]; 
     
-    console.log(`🞋 Latest PC version found: ${latestVersion}`);
+    console.log(`Latest PC version found: ${latestVersion}`);
     
     const versionData = dataPaths.pc[latestVersion];
     
     // creating folder if not exist
     await fs.mkdir(outDir, { recursive: true });
     
-    console.log(`🖿 Files will be saved in: ${outDir}\n`);
+    console.log(`Files will be saved in: ${outDir}\n`);
 
     // getting all json fil for this version
     const fetchPromises = Object.entries(versionData).map(async ([key, folderPath]) => {
@@ -66,24 +66,24 @@ export async function fetchLatestMinecraftData() {
             const fileContent = await fileRes.text();
             const destPath = path.join(outDir, `${key}.json`);
             await fs.writeFile(destPath, fileContent, 'utf-8');
-            console.log(`🖪 ${key}.json saved.`);
+            console.log(`${key}.json saved.`);
         } catch (e) {
             // some file doesn't exist anymore
             if (e.message.includes('404')) {
-                console.warn(`⚠ File not found on repo: ${key}.json`);
+                console.warn(`File not found on repo: ${key}.json`);
             } else {
-                console.error(pc.red(`𒒬 Error while fetching ${key}.json: ${e.message}`));
+                console.error(pc.red(`Error while fetching ${key}.json: ${e.message}`));
             }
         }
     });
 
     await Promise.all(fetchPromises);
-    console.log(`\n♨ All data files for version ${latestVersion} have been downloaded!`);
+    console.log(`\nAll data files for version ${latestVersion} have been downloaded!`);
     return { status: 'success', version: latestVersion };
 }
 
 if (process.argv[1] === __filename) {
     fetchLatestMinecraftData().catch(err => {
-        console.error(pc.red(`𒒬 Global error: ${err.message}`));
+        console.error(pc.red(`Global error: ${err.message}`));
     });
 }

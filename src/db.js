@@ -147,7 +147,7 @@ export async function mergeDatabaseWithJSON() {
             } else if (collectionName === 'version' || collectionName === 'loginPacket') {
                 dataArray = [jsonData];
                 if (dataArray[0] && !dataArray[0].key_name) {
-                   dataArray[0].key_name = 'default';
+                    dataArray[0].key_name = 'default';
                 }
             } else {
                 dataArray = Object.keys(jsonData).map(key => {

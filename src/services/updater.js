@@ -13,7 +13,6 @@ export async function runMinecraftUpdate() {
     
     updateState.isUpdating = true;
     updateState.startTime = new Date();
-    // Empirical estimate of 2 minutes
     updateState.expectedEndTime = new Date(Date.now() + 2 * 60000);
     
     try {
@@ -29,12 +28,12 @@ export async function runMinecraftUpdate() {
             updateState.targetVersion = fetchResult.version;
             // 2. Merge
             await mergeDatabaseWithJSON();
-            console.log('✅ Minecraft update completed successfully.');
+            console.log('Minecraft update completed successfully.');
         } else {
-            console.error('❌ Fetch failed, merge canceled.');
+            console.error('Fetch failed, merge canceled.');
         }
     } catch (err) {
-        console.error('❌ Critical error during update:', err);
+        console.error('Critical error during update:', err);
     } finally {
         updateState.isUpdating = false;
     }

@@ -45,11 +45,9 @@ export const cacheGet = async (req, res, next) => {
             return res.json(JSON.parse(cachedData));
         }
         
-        // Intercept res.json to cache the response
         const originalJson = res.json.bind(res);
         res.json = (body) => {
             if (res.statusCode >= 200 && res.statusCode < 300) {
-                // Save to cache with TTL
                 client.set(key, JSON.stringify(body), { EX: CACHE_TTL }).catch(err => {
                     console.error('Redis SET error:', err);
                 });
